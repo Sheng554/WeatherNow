@@ -142,3 +142,50 @@ function populateForecast(dailyData) {
     }
     forecastRow.innerHTML = html;
 }
+
+// Main fetch chain using async/await (Fetch API)
+async function fetchWeatherForCity(cityName) {
+    hideError();
+    renderSkeletonCurrent();
+    renderSkeletonForecast();
+
+    try {
+        // 1. Geocoding API - resolve city name to lat/lon
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`;
+        const geoResponse = await fetch(geoUrl);
+        if (!geoResponse.ok) {
+            throw new Error(`Geocoding API error: ${geoResponse.status}`);
+        }
+        const geoData = await geoResponse.json();
+        
+        // 2. Check if city found
+        if (!geoData.results || geoData.results.length === 0) {
+            showError(`City "${cityName}" not found. Please check the spelling.`);
+            return;//exit
+        }
+        
+        const { latitude, longitude, name: actualCityName } = geoData.results[0];
+        
+        // 3. Open-Meteo forecast API
+        const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
+        const forecastResponse = await fetch(forecastUrl);
+        if (!forecastResponse.ok) {
+            throw new Error(`Weather API error: ${forecastResponse.status}`);
+        }
+        const forecastData = await forecastResponse.json();
+        
+        // Extract humidity (first value from hourly)
+        let humidity = 'N/A';
+        if (forecastData.hourly && forecastData.hourly.relativehumidity_2m && forecastData.hourly.relativehumidity_2m.length > 0) {
+            humidity = forecastData.hourly.relativehumidity_2m[0];
+        }
+        
+        // Populate UI
+        populateCurrentWeather(forecastData, actualCityName, humidity);
+        populateForecast(forecastData.daily);
+        
+    } catch (err) {
+        console.error(err);
+        showError(`Network or server error: ${err.message}. Please try again.`);
+    }
+}
