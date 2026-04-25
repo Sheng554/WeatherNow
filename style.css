@@ -189,6 +189,15 @@ h1 {
     color: #475569;
 }
 
+.real-data .local-time {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .forecast-card.real-data .forecast-day {
     font-weight: 600;
     margin-bottom: 0.5rem;
