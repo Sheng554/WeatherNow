@@ -236,6 +236,10 @@ searchBtn.addEventListener('click', () => {
         showError('Please enter a city name.');
         return;
     }
+    if (city.length < 2) {
+        showError('City name must be at least 2 characters.');
+        return;
+    }
     lastSearchCity = city;
     fetchWeatherForCity(city);
 });
