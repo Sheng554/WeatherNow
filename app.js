@@ -190,7 +190,7 @@ async function fetchWeatherForCity(cityName) {
         const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`;
         const geoResponse = await fetch(geoUrl);
         if (!geoResponse.ok) {
-            throw new Error(`Geocoding API error: ${geoResponse.status}`);
+            throw new Error(`Geocoding API error (HTTP ${geoResponse.status})`);
         }
         const geoData = await geoResponse.json();
         
@@ -206,7 +206,7 @@ async function fetchWeatherForCity(cityName) {
         const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
         const forecastResponse = await fetch(forecastUrl);
         if (!forecastResponse.ok) {
-            throw new Error(`Weather API error: ${forecastResponse.status}`);
+            throw new Error(`Weather API error (HTTP ${forecastResponse.status})`);
         }
         const forecastData = await forecastResponse.json();
         
