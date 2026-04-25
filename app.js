@@ -60,6 +60,14 @@ const forecastRow = document.getElementById('forecastRow');
 
 let lastSearchCity = 'Johor Bahru';
 
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
 // Helper: show/hide error
 function showError(msg) {
     errorMessage.textContent = msg;
