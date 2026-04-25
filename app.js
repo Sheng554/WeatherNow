@@ -114,6 +114,7 @@ function populateCurrentWeather(weatherData, cityName, humidity) {
                 <div class="detail-item">💧 Humidity: ${humidity}%</div>
                 <div class="detail-item">💨 Wind: ${wind} km/h</div>
             </div>
+            <div class="local-time" id="localTimeDisplay">🕒 Loading local time...</div>
         </div>
     `;
     currentCard.classList.add('real-data');
