@@ -169,6 +169,39 @@ h1 {
     box-shadow: var(--shadow-md);
 }
 
+/* Real data styles (replacing skeletons) */
+.real-data .city-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.real-data .temperature {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.real-data .description {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+.real-data .detail-item {
+    font-size: 1rem;
+    color: #475569;
+}
+
+.forecast-card.real-data .forecast-day {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.forecast-card.real-data .forecast-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.forecast-card.real-data .forecast-temp {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
 /* ========== SKELETON LOADING ANIMATION ========== */
 @keyframes shimmer {
     0% { background-position: -200% 0; }

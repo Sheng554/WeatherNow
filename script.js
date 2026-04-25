@@ -68,3 +68,31 @@ function showError(msg) {
 function hideError() {
     errorBanner.classList.add('hidden');
 }
+
+// Skeleton rendering functions
+function renderSkeletonCurrent() {
+    currentCard.innerHTML = `
+        <div class="skeleton city-skeleton"></div>
+        <div class="skeleton temp-skeleton"></div>
+        <div class="skeleton desc-skeleton"></div>
+        <div class="detail-row">
+            <div class="skeleton detail-skeleton"></div>
+            <div class="skeleton detail-skeleton"></div>
+        </div>
+    `;
+    currentCard.classList.remove('real-data');
+}
+
+function renderSkeletonForecast() {
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+        html += `
+            <div class="forecast-card">
+                <div class="skeleton day-skeleton"></div>
+                <div class="skeleton icon-skeleton"></div>
+                <div class="skeleton temp-skeleton"></div>
+            </div>
+        `;
+    }
+    forecastRow.innerHTML = html;
+}
