@@ -1,0 +1,240 @@
+/* ========== ROOT VARIABLES ========== */
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-hover: #2563eb;
+    --color-bg-page: #f0f4f8;
+    --color-bg-card: #ffffff;
+    --color-border: #cbd5e1;
+    --color-focus-ring: rgba(59, 130, 246, 0.2);
+    
+    --skeleton-base: #e0e0e0;
+    --skeleton-highlight: #f5f5f5;
+    
+    --text-dark: #1e293b;
+    --text-forecast-header: #1a1a1a;
+    
+    --scrollbar-track: #e2e8f0;
+    --scrollbar-thumb: #94a3b8;
+    
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --spacing-2xl: 2rem;
+    --spacing-3xl: 2.5rem;
+    
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 32px;
+    --radius-round: 50%;
+    
+    --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.05);
+    
+    --font-xs: 0.75rem;
+    --font-sm: 0.875rem;
+    --font-base: 1rem;
+    --font-md: 1.1rem;
+    --font-lg: 1.25rem;
+    --font-xl: 1.5rem;
+    --font-2xl: 2rem;
+    --font-3xl: 2.2rem;
+    
+    --transition-fast: 0.2s;
+    --transition-normal: 0.3s ease-in-out;
+    
+    --shimmer-duration: 1.5s;
+}
+
+/* ========== GLOBAL RESET ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background: var(--color-bg-page);
+    padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ========== TYPOGRAPHY ========== */
+h1 {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    font-weight: 600;
+    font-size: var(--font-3xl);
+    color: var(--text-dark);
+}
+
+/* ========== SEARCH SECTION ========== */
+.search-section {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    margin-bottom: var(--spacing-2xl);
+    flex-wrap: wrap;
+}
+
+#cityInput {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-base);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    width: 260px;
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+#cityInput:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 3px 3px var(--color-focus-ring);
+}
+
+#searchBtn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-base);
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+#searchBtn:hover {
+    background: var(--color-primary-hover);
+}
+
+/* ========== CURRENT WEATHER CARD ========== */
+.current-card {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+    box-shadow: var(--shadow-md);
+}
+
+/* ========== SKELETON LOADING ANIMATION ========== */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, 
+        var(--skeleton-base) 25%, 
+        var(--skeleton-highlight) 50%, 
+        var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: shimmer var(--shimmer-duration) infinite;
+    border-radius: var(--radius-md);
+}
+
+.city-skeleton {
+    width: 60%;
+    height: 32px;
+    margin-bottom: var(--spacing-md);
+}
+.temp-skeleton {
+    width: 40%;
+    height: 48px;
+    margin-bottom: var(--spacing-md);
+}
+.desc-skeleton {
+    width: 50%;
+    height: 20px;
+    margin-bottom: var(--spacing-lg);
+}
+.detail-row {
+    display: flex;
+    gap: var(--spacing-2xl);
+    margin-bottom: var(--spacing-lg);
+}
+.detail-skeleton {
+    width: 100px;
+    height: 20px;
+}
+.time-skeleton {
+    width: 45%;
+    height: 20px;
+}
+
+/* ========== FORECAST HEADER ========== */
+.forecast-header {
+    margin: var(--spacing-xl) 0 var(--spacing-lg) 0;
+}
+.forecast-header h2 {
+    font-size: var(--font-xl);
+    font-weight: 500;
+}
+
+/* ========== FORECAST ROW (7-day cards) ========== */
+.forecast-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--spacing-lg);
+    overflow-x: auto;
+    padding-bottom: var(--spacing-sm);
+}
+
+/* ========== SROLLBAR DESIGN ========== */
+.forecast-row::-webkit-scrollbar {
+    height: 6px;
+}
+
+.forecast-row::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: var(--radius-full);
+}
+
+.forecast-row::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: var(--radius-full);
+}
+
+.forecast-card {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg) var(--spacing-md);
+    min-width: 100px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    flex: 1;
+}
+
+.day-skeleton {
+    height: 24px;
+    width: 70%;
+    margin: 0 auto var(--spacing-md) auto;
+}
+
+.icon-skeleton {
+    height: 40px;
+    width: 40px;
+    border-radius: var(--radius-round);
+    margin: 0 auto var(--spacing-md) auto;
+}
+
+.forecast-card .temp-skeleton {
+    height: 18px;
+    width: 80%;
+    margin: 0 auto;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 800px) {
+    .forecast-card {
+        min-width: 85px;
+    }
+}
