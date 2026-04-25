@@ -187,6 +187,23 @@ function updateLocalTimeWithJQuery(timezone) {
         });
 }
 
+// Fetch with timeout (default 10 seconds)
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+            throw new Error(`Request timeout (${timeoutMs}ms): ${url}`);
+        }
+        throw err;
+    }
+}
+
 // Main fetch chain using async/await (Fetch API)
 async function fetchWeatherForCity(cityName) {
     hideError();
@@ -196,7 +213,7 @@ async function fetchWeatherForCity(cityName) {
     try {
         // 1. Geocoding API - resolve city name to lat/lon
         const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`;
-        const geoResponse = await fetch(geoUrl);
+        const geoResponse = await fetchWithTimeout(geoUrl);
         if (!geoResponse.ok) {
             throw new Error(`Geocoding API error (HTTP ${geoResponse.status})`);
         }
@@ -212,7 +229,7 @@ async function fetchWeatherForCity(cityName) {
         
         // 3. Open-Meteo forecast API
         const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
-        const forecastResponse = await fetch(forecastUrl);
+        const forecastResponse = await fetchWithTimeout(forecastUrl);
         if (!forecastResponse.ok) {
             throw new Error(`Weather API error (HTTP ${forecastResponse.status})`);
         }
@@ -237,8 +254,7 @@ async function fetchWeatherForCity(cityName) {
     }
 }
 
-// Event listeners
-searchBtn.addEventListener('click', () => {
+function performSearch() {
     const city = cityInput.value.trim();
     if (city === '') {
         showError('Please enter a city name.');
@@ -250,7 +266,13 @@ searchBtn.addEventListener('click', () => {
     }
     lastSearchCity = city;
     fetchWeatherForCity(city);
-});
+}
+
+const debouncedSearch = debounce(performSearch, 500);
+
+// Bind events
+searchBtn.addEventListener('click', debouncedSearch);
+cityInput.addEventListener('input', debouncedSearch);
 
 retryBtn.addEventListener('click', () => {
     fetchWeatherForCity(lastSearchCity);
