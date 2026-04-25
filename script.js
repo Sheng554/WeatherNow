@@ -1,4 +1,4 @@
-// ========== WEATHER CODE MAPPING (Task 2 requirement) ==========
+// ========== WEATHER CODE MAPPING ==========
 const weatherCodeMap = {
     0: { description: "Clear sky", icon: "☀️" },
     1: { description: "Mainly clear", icon: "🌤️" },
@@ -33,10 +33,20 @@ const weatherCodeMap = {
 function getWeatherInfo(code) {
     return weatherCodeMap[code] || { description: "Unknown", icon: "❓" };
 }
+//return { description: "Unknown", icon: "❓" } if no found
 
 function getWeekday(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { weekday: 'short' });
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // DOM elements
@@ -48,7 +58,7 @@ const retryBtn = document.getElementById('retryBtn');
 const currentCard = document.getElementById('currentWeatherCard');
 const forecastRow = document.getElementById('forecastRow');
 
-let lastSearchCity = 'Beijing';
+let lastSearchCity = 'Johor Bahru';
 
 // Helper: show/hide error
 function showError(msg) {
@@ -58,152 +68,3 @@ function showError(msg) {
 function hideError() {
     errorBanner.classList.add('hidden');
 }
-
-// Skeleton rendering functions
-function renderSkeletonCurrent() {
-    currentCard.innerHTML = `
-        <div class="skeleton city-skeleton"></div>
-        <div class="skeleton temp-skeleton"></div>
-        <div class="skeleton desc-skeleton"></div>
-        <div class="detail-row">
-            <div class="skeleton detail-skeleton"></div>
-            <div class="skeleton detail-skeleton"></div>
-        </div>
-    `;
-    currentCard.classList.remove('real-data');
-}
-
-function renderSkeletonForecast() {
-    let html = '';
-    for (let i = 0; i < 7; i++) {
-        html += `
-            <div class="forecast-card">
-                <div class="skeleton day-skeleton"></div>
-                <div class="skeleton icon-skeleton"></div>
-                <div class="skeleton temp-skeleton"></div>
-            </div>
-        `;
-    }
-    forecastRow.innerHTML = html;
-}
-
-// Populate current weather card with real data
-function populateCurrentWeather(weatherData, cityName, humidity) {
-    const current = weatherData.current_weather;
-    const temp = current.temperature;
-    const wind = current.windspeed;
-    const weatherCode = current.weathercode;
-    const weatherInfo = getWeatherInfo(weatherCode);
-
-    currentCard.innerHTML = `
-        <div class="real-data">
-            <div class="city-name">${escapeHtml(cityName)}</div>
-            <div class="temperature">${temp}°C</div>
-            <div class="description">${weatherInfo.icon} ${weatherInfo.description}</div>
-            <div class="detail-row">
-                <div class="detail-item">💧 Humidity: ${humidity}%</div>
-                <div class="detail-item">💨 Wind: ${wind} km/h</div>
-            </div>
-        </div>
-    `;
-    currentCard.classList.add('real-data');
-}
-
-// Populate 7-day forecast
-function populateForecast(dailyData) {
-    const times = dailyData.time;
-    const maxTemps = dailyData.temperature_2m_max;
-    const minTemps = dailyData.temperature_2m_min;
-    const weatherCodes = dailyData.weathercode;
-
-    let html = '';
-    for (let i = 0; i < times.length; i++) {
-        const dayName = getWeekday(times[i]);
-        const weatherInfo = getWeatherInfo(weatherCodes[i]);
-        const max = maxTemps[i];
-        const min = minTemps[i];
-        html += `
-            <div class="forecast-card real-data">
-                <div class="forecast-day">${dayName}</div>
-                <div class="forecast-icon">${weatherInfo.icon}</div>
-                <div class="forecast-temp">${max}° / ${min}°</div>
-            </div>
-        `;
-    }
-    forecastRow.innerHTML = html;
-}
-
-// Simple escape to prevent XSS
-function escapeHtml(str) {
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-// Main fetch chain using async/await (Fetch API)
-async function fetchWeatherForCity(cityName) {
-    hideError();
-    renderSkeletonCurrent();
-    renderSkeletonForecast();
-
-    try {
-        // 1. Geocoding API - resolve city name to lat/lon
-        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`;
-        const geoResponse = await fetch(geoUrl);
-        if (!geoResponse.ok) {
-            throw new Error(`Geocoding API error: ${geoResponse.status}`);
-        }
-        const geoData = await geoResponse.json();
-        
-        // 2. Check if city found
-        if (!geoData.results || geoData.results.length === 0) {
-            showError(`City "${cityName}" not found. Please check the spelling.`);
-            return;
-        }
-        
-        const { latitude, longitude, name: actualCityName } = geoData.results[0];
-        
-        // 3. Open-Meteo forecast API
-        const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
-        const forecastResponse = await fetch(forecastUrl);
-        if (!forecastResponse.ok) {
-            throw new Error(`Weather API error: ${forecastResponse.status}`);
-        }
-        const forecastData = await forecastResponse.json();
-        
-        // Extract humidity (first value from hourly)
-        let humidity = 'N/A';
-        if (forecastData.hourly && forecastData.hourly.relativehumidity_2m && forecastData.hourly.relativehumidity_2m.length > 0) {
-            humidity = forecastData.hourly.relativehumidity_2m[0];
-        }
-        
-        // Populate UI
-        populateCurrentWeather(forecastData, actualCityName, humidity);
-        populateForecast(forecastData.daily);
-        
-    } catch (err) {
-        console.error(err);
-        showError(`Network or server error: ${err.message}. Please try again.`);
-    }
-}
-
-// Event listeners
-searchBtn.addEventListener('click', () => {
-    const city = cityInput.value.trim();
-    if (city === '') {
-        showError('Please enter a city name.');
-        return;
-    }
-    lastSearchCity = city;
-    fetchWeatherForCity(city);
-});
-
-retryBtn.addEventListener('click', () => {
-    fetchWeatherForCity(lastSearchCity);
-});
-
-// Initial load (Beijing)
-fetchWeatherForCity('Beijing');

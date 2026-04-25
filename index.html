@@ -19,6 +19,11 @@
             <button id="searchBtn">🔍 Search</button>
         </div>
 
+        <div class="error-banner hidden" id="errorBanner">
+            <p>⚠️ <span id="errorMessage">Error message</span></p>
+            <button class="retry-btn" id="retryBtn">🔄 Retry</button>
+        </div>
+
         <!-- Current Weather Card (skeleton placeholders) -->
         <div class="current-card" id="currentWeatherCard">
             <div class="skeleton city-skeleton"></div>
@@ -76,8 +81,7 @@
         </div>
     </div>
 
-    <!-- jQuery (required for later tasks) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
-    <!-- No main logic yet – only Task 1 skeleton UI -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
