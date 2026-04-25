@@ -96,3 +96,49 @@ function renderSkeletonForecast() {
     }
     forecastRow.innerHTML = html;
 }
+
+// Populate current weather card with real data
+function populateCurrentWeather(weatherData, cityName, humidity) {
+    const current = weatherData.current_weather;
+    const temp = current.temperature;
+    const wind = current.windspeed;
+    const weatherCode = current.weathercode;
+    const weatherInfo = getWeatherInfo(weatherCode);
+
+    currentCard.innerHTML = `
+        <div class="real-data">
+            <div class="city-name">${escapeHtml(cityName)}</div>
+            <div class="temperature">${temp}°C</div>
+            <div class="description">${weatherInfo.icon} ${weatherInfo.description}</div>
+            <div class="detail-row">
+                <div class="detail-item">💧 Humidity: ${humidity}%</div>
+                <div class="detail-item">💨 Wind: ${wind} km/h</div>
+            </div>
+        </div>
+    `;
+    currentCard.classList.add('real-data');
+}
+
+// Populate 7-day forecast
+function populateForecast(dailyData) {
+    const times = dailyData.time;
+    const maxTemps = dailyData.temperature_2m_max;
+    const minTemps = dailyData.temperature_2m_min;
+    const weatherCodes = dailyData.weathercode;
+
+    let html = '';
+    for (let i = 0; i < times.length; i++) {
+        const dayName = getWeekday(times[i]);
+        const weatherInfo = getWeatherInfo(weatherCodes[i]);
+        const max = maxTemps[i];
+        const min = minTemps[i];
+        html += `
+            <div class="forecast-card real-data">
+                <div class="forecast-day">${dayName}</div>
+                <div class="forecast-icon">${weatherInfo.icon}</div>
+                <div class="forecast-temp">${max}° / ${min}°</div>
+            </div>
+        `;
+    }
+    forecastRow.innerHTML = html;
+}
