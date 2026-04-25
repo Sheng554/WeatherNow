@@ -79,6 +79,7 @@ function renderSkeletonCurrent() {
             <div class="skeleton detail-skeleton"></div>
             <div class="skeleton detail-skeleton"></div>
         </div>
+        <div class="skeleton time-skeleton"></div>
     `;
     currentCard.classList.remove('real-data');
 }
@@ -144,6 +145,40 @@ function populateForecast(dailyData) {
     forecastRow.innerHTML = html;
 }
 
+// Task 3: Fetch local time using jQuery $.getJSON
+function updateLocalTimeWithJQuery(timezone) {
+    const $timeElement = $('#localTimeDisplay');
+    
+    if (!timezone) {
+        // Fallback to browser time if no timezone provided
+        const browserTime = new Date();
+        const timeString = browserTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $timeElement.html(`🕒 Browser Time: ${timeString}`);
+        console.log(`WorldTimeAPI skipped (no timezone) at ${new Date().toISOString()}`);
+        return;
+    }
+    
+    const url = `https://worldtimeapi.org/api/timezone/${encodeURIComponent(timezone)}`;
+    
+    $.getJSON(url)
+        .done(function(data) {
+            const datetime = data.datetime;
+            const localTime = new Date(datetime);
+            const timeString = localTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            $timeElement.html(`🕒 Local Time (${timezone}): ${timeString}`);
+        })
+        .fail(function(jqxhr, textStatus, error) {
+            console.warn(`WorldTimeAPI failed for ${timezone}: ${textStatus}`);
+            // Fallback to browser time
+            const browserTime = new Date();
+            const timeString = browserTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            $timeElement.html(`🕒 Browser Time: ${timeString}`);
+        })
+        .always(function() {
+            console.log(`WorldTimeAPI request completed at ${new Date().toISOString()}`);
+        });
+}
+
 // Main fetch chain using async/await (Fetch API)
 async function fetchWeatherForCity(cityName) {
     hideError();
@@ -184,6 +219,9 @@ async function fetchWeatherForCity(cityName) {
         // Populate UI
         populateCurrentWeather(forecastData, actualCityName, humidity);
         populateForecast(forecastData.daily);
+
+        const timezone = forecastData.timezone;
+        updateLocalTimeWithJQuery(timezone);
         
     } catch (err) {
         console.error(err);
