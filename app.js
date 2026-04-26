@@ -68,6 +68,55 @@ function debounce(func, delay) {
     };
 }
 
+// ========== RECENT SEARCHES HISTORY (localStorage) ==========
+const STORAGE_KEY = 'weather_recent_cities';
+const MAX_HISTORY = 5;
+
+function getRecentCities() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveRecentCities(cities) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cities.slice(0, MAX_HISTORY)));
+}
+
+function addToHistory(cityName) {
+    let cities = getRecentCities();
+    // Remove if already exists (to move to front)
+    cities = cities.filter(c => c !== cityName);
+    // Add to front
+    cities.unshift(cityName);
+    // Keep only MAX_HISTORY
+    if (cities.length > MAX_HISTORY) cities.pop();
+    saveRecentCities(cities);
+    renderRecentChips();
+}
+
+function renderRecentChips() {
+    const container = document.getElementById('recentSearches');
+    if (!container) return;
+    const cities = getRecentCities();
+    if (cities.length === 0) {
+        container.innerHTML = '<span class="recent-placeholder">🔍 No recent cities</span>';
+        return;
+    }
+    container.innerHTML = cities.map(city => 
+        `<button class="city-chip" data-city="${escapeHtml(city)}">${escapeHtml(city)}</button>`
+    ).join('');
+    
+    // Attach click handlers
+    document.querySelectorAll('.city-chip').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const city = btn.getAttribute('data-city');
+            if (city) {
+                cityInput.value = city;
+                performSearch(); // defined earlier
+            }
+        });
+    });
+}
+
 // Helper: show/hide error
 function showError(msg) {
     errorMessage.textContent = msg;
