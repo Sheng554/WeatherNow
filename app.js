@@ -60,6 +60,15 @@ const forecastRow = document.getElementById('forecastRow');
 
 let lastSearchCity = 'Johor Bahru';
 
+let currentCelsiusTemp = null;        // for current weather temp
+let currentHumidity = null;            // keep humidity unchanged
+let currentWind = null;                // keep wind unchanged
+let currentWeatherCode = null;         // for icon/desc
+let currentCityName = null;
+
+let forecastDataStore = null;           // store raw daily forecast data (Celsius)
+let currentUnit = 'C';                  // 'C' or 'F'
+
 function debounce(func, delay) {
     let timeoutId;
     return function(...args) {
@@ -158,44 +167,70 @@ function renderSkeletonForecast() {
 // Populate current weather card with real data
 function populateCurrentWeather(weatherData, cityName, humidity) {
     const current = weatherData.current_weather;
-    const temp = current.temperature;
-    const wind = current.windspeed;
-    const weatherCode = current.weathercode;
-    const weatherInfo = getWeatherInfo(weatherCode);
+    currentCelsiusTemp = current.temperature;
+    currentWind = current.windspeed;
+    currentWeatherCode = current.weathercode;
+    currentHumidity = humidity;
+    currentCityName = cityName;
+    
+    updateCurrentTempDisplay();
+}
 
-    currentCard.innerHTML = `
+function updateCurrentTempDisplay() {
+    if (currentCelsiusTemp === null) return;
+    const temp = currentUnit === 'C' ? currentCelsiusTemp : (currentCelsiusTemp * 9/5 + 32);
+    const unitSymbol = currentUnit === 'C' ? '°C' : '°F';
+    const weatherInfo = getWeatherInfo(currentWeatherCode);
+    
+    const currentCardDiv = document.getElementById('currentWeatherCard');
+    // Keep the same inner HTML structure but update temperature value
+    currentCardDiv.innerHTML = `
         <div class="real-data">
-            <div class="city-name">${escapeHtml(cityName)}</div>
-            <div class="temperature">${temp}°C</div>
+            <div class="city-name">${escapeHtml(currentCityName)}</div>
+            <div class="temperature">${temp.toFixed(1)}${unitSymbol}</div>
             <div class="description">${weatherInfo.icon} ${weatherInfo.description}</div>
             <div class="detail-row">
-                <div class="detail-item">💧 Humidity: ${humidity}%</div>
-                <div class="detail-item">💨 Wind: ${wind} km/h</div>
+                <div class="detail-item">💧 Humidity: ${currentHumidity}%</div>
+                <div class="detail-item">💨 Wind: ${currentWind} km/h</div>
             </div>
             <div class="local-time" id="localTimeDisplay">🕒 Loading local time...</div>
         </div>
     `;
-    currentCard.classList.add('real-data');
+    currentCardDiv.classList.add('real-data');
+    // Re-attach time (if already fetched) – we can call a function to refresh time later.
 }
 
 // Populate 7-day forecast
 function populateForecast(dailyData) {
-    const times = dailyData.time;
-    const maxTemps = dailyData.temperature_2m_max;
-    const minTemps = dailyData.temperature_2m_min;
-    const weatherCodes = dailyData.weathercode;
+    // Store raw data in Celsius
+    forecastDataStore = {
+        times: dailyData.time,
+        maxCelsius: dailyData.temperature_2m_max,
+        minCelsius: dailyData.temperature_2m_min,
+        weatherCodes: dailyData.weathercode
+    };
+    updateForecastDisplay();
+}
 
+function updateForecastDisplay() {
+    if (!forecastDataStore) return;
+    const { times, maxCelsius, minCelsius, weatherCodes } = forecastDataStore;
     let html = '';
     for (let i = 0; i < times.length; i++) {
         const dayName = getWeekday(times[i]);
         const weatherInfo = getWeatherInfo(weatherCodes[i]);
-        const max = maxTemps[i];
-        const min = minTemps[i];
+        let maxTemp = maxCelsius[i];
+        let minTemp = minCelsius[i];
+        if (currentUnit === 'F') {
+            maxTemp = maxCelsius[i] * 9/5 + 32;
+            minTemp = minCelsius[i] * 9/5 + 32;
+        }
+        const unitSymbol = currentUnit === 'C' ? '°C' : '°F';
         html += `
             <div class="forecast-card real-data">
                 <div class="forecast-day">${dayName}</div>
                 <div class="forecast-icon">${weatherInfo.icon}</div>
-                <div class="forecast-temp">${max}° / ${min}°</div>
+                <div class="forecast-temp">${maxTemp.toFixed(1)}${unitSymbol} / ${minTemp.toFixed(1)}${unitSymbol}</div>
             </div>
         `;
     }
@@ -253,6 +288,19 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
     }
 }
 
+// Temperature unit toggle
+const toggleCheckbox = document.getElementById('tempUnitToggle');
+const unitLabel = document.getElementById('unitLabel');
+
+toggleCheckbox.addEventListener('change', function() {
+    currentUnit = this.checked ? 'F' : 'C';
+    unitLabel.textContent = currentUnit === 'C' ? '°C' : '°F';
+    // Refresh displays
+    if (currentCelsiusTemp !== null) updateCurrentTempDisplay();
+    if (forecastDataStore) updateForecastDisplay();
+    // Time display doesn't change with temperature
+});
+
 // Main fetch chain using async/await (Fetch API)
 async function fetchWeatherForCity(cityName) {
     hideError();
@@ -293,6 +341,7 @@ async function fetchWeatherForCity(cityName) {
         // Populate UI
         populateCurrentWeather(forecastData, actualCityName, humidity);
         populateForecast(forecastData.daily);
+        addToHistory(actualCityName);
 
         const timezone = forecastData.timezone;
         updateLocalTimeWithJQuery(timezone);
