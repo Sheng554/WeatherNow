@@ -19,6 +19,19 @@
             <button id="searchBtn">🔍 Search</button>
         </div>
 
+        <!-- Recent Searches & Toggle -->
+        <div class="history-toggle-row">
+            <div class="recent-searches" id="recentSearches"></div>
+            <div class="temp-toggle">
+                <span>🌡️</span>
+                <label class="switch">
+                    <input type="checkbox" id="tempUnitToggle">
+                    <span class="slider round"></span>
+                </label>
+                <span id="unitLabel">°C</span>
+            </div>
+        </div>
+
         <div class="error-banner hidden" id="errorBanner">
             <p>⚠️ <span id="errorMessage">Error message</span></p>
             <button class="retry-btn" id="retryBtn">🔄 Retry</button>
