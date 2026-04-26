@@ -1,1 +1,12 @@
-During this WeatherNow project, I used both the Fetch API and jQuery AJAX to get data from different APIs. The Fetch API was used for getting the location and weather data, while jQuery’s $.getJSON() was used to get the local time. From this experience, I learned the differences between these two methods. The Fetch API is built into the browser, so I did not need to include any extra library. It also works well with async and await, which makes the code easier to read and understand. However, Fetch API needs extra steps to handle errors, such as checking response.ok and converting the response to JSON manually. On the other hand, jQuery AJAX is easier to use for simple requests. It can automatically parse JSON and has built-in methods like .done(), .fail(), and .always() for handling results. This makes the code shorter and simpler. But the disadvantage is that it requires loading the jQuery library, which makes the application larger. In my opinion, I prefer using the Fetch API because it is modern, has excellent native browser support, and does not need extra files. However, jQuery AJAX is still useful for older projects or when quick and simple coding is needed.
+During this WeatherNow project, I used both the Fetch API and jQuery AJAX to get data from different APIs. 
+The Fetch API was used for getting the location and weather data, while jQuery’s $.getJSON() was used to get the local time. 
+From this experience, I learned the differences between these two methods. 
+The Fetch API is built into the browser, so I did not need to include any extra library. 
+It also works well with async and await, which makes the code easier to read and understand. 
+However, Fetch API needs extra steps to handle errors, such as checking response.ok and converting the response to JSON manually. 
+On the other hand, jQuery AJAX is easier to use for simple requests. 
+It can automatically parse JSON and has built-in methods like .done(), .fail(), and .always() for handling results. 
+This makes the code shorter and simpler. 
+But the disadvantage is that it requires loading the jQuery library, which makes the application larger. 
+In my opinion, I prefer using the Fetch API because it is modern, has excellent native browser support, and does not need extra files. 
+However, jQuery AJAX is still useful for older projects or when quick and simple coding is needed.
